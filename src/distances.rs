@@ -1,5 +1,39 @@
 use distance::hamming;
 use itertools::Itertools;
+use crate::utils::{set_functions, is_injective, inj_distance, self};
+
+//absolute
+pub fn dmax_abs(set:&Vec<String>) -> i32{
+    let val = set.get(0).unwrap().len();
+    return val as i32;
+}
+
+//relative
+pub fn dmax_rel(set1:&Vec<String>,set2:&Vec<String>) -> i32{
+    let mut max = 0;
+    set1.iter().for_each(|x_val|{
+        set2.iter().for_each(|y_val|{
+            if hamming(x_val, y_val).unwrap() > max{
+                max = hamming(x_val, y_val).unwrap();
+            }
+        });
+    });
+
+    return max as i32;
+}
+
+pub fn dmin_rel(set1:&Vec<String>,set2:&Vec<String>) ->i32{
+    let mut min = dmax_rel(set1, set2) as usize;
+    set1.iter().for_each(|x_val|{
+        set2.iter().for_each(|y_val|{
+            if hamming(x_val, y_val).unwrap() <= min{
+                min = hamming(x_val, y_val).unwrap();
+            }
+        });
+    });
+
+    return min as i32;
+}
 
 pub fn min_distance_point_set(point: &String, set:&Vec<String>) -> i32{
     let mut ham = 0;
@@ -31,16 +65,32 @@ pub fn sum_min_distance(set1:&Vec<String>,set2:&Vec<String>) -> i32{
     return distance as i32;
 }
 
-pub fn set_functions(set1:&Vec<String>, set2:&Vec<String>){
-    println!("X:{:?}, Y:{:?}", set1,set2);
-
-    let mut result: Vec<(String, String)> = Vec::new();
-    for permut in set2.iter().permutations(set2.len()){
-        for (a, b) in set1.iter().zip(permut) {
-            result.push((a.to_string(), b.to_string()));
-        }
-    }
-    println!("{:?}", result);
-    
-    
+pub fn idis_simple(set1:&Vec<String>,set2:&Vec<String>) -> i32 {
+    let opt_inj_function = utils::get_opt_fun(set1, set2);
+    return inj_distance(&opt_inj_function);
 }
+
+pub fn idis(set1:&Vec<String>,set2:&Vec<String>) -> i32 {
+    let mut dis = 0;
+    let mut union = set1.clone();
+    let y = set2.clone();
+    union.extend(y);
+
+    let opt_inj_function = utils::get_opt_fun(set1, set2);
+    let rem = utils::get_remain_set(set1, set2, &opt_inj_function);
+    
+    // in this case dmax is over the domain of set1\cup set2
+    match rem {
+        None => {
+            dis = idis_simple(set1, set2);
+        },
+        Some(..) => {
+            let n_rem = rem.as_ref().unwrap().len() as i32;
+            let penalty = dmax_abs(&union) * n_rem;
+            dis = idis_simple(set1, set2) + penalty;
+        }
+    };
+    return dis;
+}
+
+
