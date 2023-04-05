@@ -1,6 +1,7 @@
 use std::{collections::HashSet, vec};
 use distance::hamming;
 use itertools::Itertools;
+use rand::{thread_rng, Rng};
 
 use crate::distances::{dmax_rel, dmin_rel};
 
@@ -107,6 +108,8 @@ pub fn is_far(set1:&Vec<String>,set2:&Vec<String>, set3:&Vec<String>) -> bool{
     let y = set2.clone();
     union.extend(y);
     
+    // println!("{}",max);
+    // println!("{}",dmin_rel(&union, set3));
     if  dmin_rel(&union, set3) > max{
         // println!("=");
         // println!("Dmax {}, Min {:?}-{:?} = {}",max, union,set3,dmin_rel(&union, set3) );
@@ -115,3 +118,7 @@ pub fn is_far(set1:&Vec<String>,set2:&Vec<String>, set3:&Vec<String>) -> bool{
     return false;
 }
 
+pub fn remove_duplicates<T: Eq + std::hash::Hash>(vec: &mut Vec<T>){
+  let set: HashSet<_> = vec.drain(..).collect();
+  vec.extend(set.into_iter());
+}
