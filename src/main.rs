@@ -161,7 +161,7 @@ fn is_metric(valuations:Vec<String>, limit:usize, dis:fn(&Vec<String>,&Vec<Strin
     //     }
     // }
     //
-    println!("Sym finished");
+    // println!("Sym finished");
     for x in pow.iter().combinations(3){
         let set1 = x.get(0).unwrap();
         let set2 = x.get(1).unwrap();
@@ -181,14 +181,21 @@ fn is_metric(valuations:Vec<String>, limit:usize, dis:fn(&Vec<String>,&Vec<Strin
 }
 
 fn main() {
-    // let combinations = generate_val_combinations(3);
-    // is_metric(combinations, 50, idis);
+    // let combinations = generate_val_combinations(2);
+    // is_metric(combinations, 50, distances::idis_rec);
     // let mut pow = generate_random_subsets(&combinations, 100);
     // pow.retain(|x| !x.is_empty());
     // println!("{:?}", combinations);
     // println!("Comb size = {}, Pow size={}", combinations.len(), pow.len());
     
-    // let val1 = vec!["100000011111".to_string()];
+    let val1 = vec!["01".to_string()];
+    let val2 = vec!["11".to_string(), "00".to_string()];
+    let val3 = vec!["01".to_string(), "11".to_string(), "10".to_string(), "00".to_string()];
+
+    let sat = axioms::triangle_inequality(&val1, &val2, &val3, distances::idis_rec);
+    println!("{:?}", sat);
+
+    // / let val1 = vec!["100000011111".to_string()];
     // let val2 = vec!["000000000000".to_string(), "100010011111".to_string(), "100001011111".to_string(),"100000111111".to_string()];
     // let val3 = vec!["110000000000".to_string(), "111000000000".to_string(),"111100000000".to_string()];
     // let val4 = vec!["010000000000".to_string(), "011000000000".to_string(),"011100000000".to_string()];
@@ -198,8 +205,8 @@ fn main() {
     // let val2 = vec!["0000000000001111111".to_string(), "1000100111111111111".to_string(), "1000010111111111111".to_string(),"1000001111111111111".to_string()];
     // let val3 = vec!["1100000000000000000".to_string(), "1110000000000000000".to_string(),"1111000000000000000".to_string()];
     // let val4 = vec!["0100000000000000000".to_string(), "0110000000000000000".to_string(),"0111000000000000000".to_string()];
-
-    // let sat = axioms::ax7(&val1, &val2, &val3,&val4, distances::idis_rec);
+    //
+    // let sat = axioms::ax7(&val1, &val2, &val3,&val4, distances::rep_dis);
     // println!("{:?}", sat);
 
     // let sat = axioms::ax7(&val1, &val2, &val3,&val4, distances::idis);
@@ -216,5 +223,5 @@ fn main() {
     // }
     // sat_axiom(&pow, distances::idis);
     // debug(3);
-    test_ax(15,500);
+    // test_ax(4,500);
 }

@@ -78,6 +78,16 @@ pub fn idis(set1:&Vec<String>,set2:&Vec<String>) -> i32 {
     let y = set2.clone();
     union.extend(y);
 
+    let mut small:Vec<String> = Vec::new();
+    let mut big:Vec<String> = Vec::new();
+    if set1.len()<=set2.len(){
+        small = set1.clone();
+        big = set2.clone();
+    }else {
+        small = set2.clone();
+        big = set1.clone();
+    }
+
     let opt_inj_function = utils::get_opt_fun(set1, set2);
     let rem = utils::get_remain_set(set1, set2, &opt_inj_function);
     
@@ -88,8 +98,13 @@ pub fn idis(set1:&Vec<String>,set2:&Vec<String>) -> i32 {
         },
         Some(..) => {
             let n_rem = rem.as_ref().unwrap().len() as i32;
-            let penalty = dmax_abs(&union) * n_rem;
-            dis = idis_simple(set1, set2) + penalty;
+            let penalty_simple = dmax_abs(&union) * n_rem;
+            let mut pen = 0;
+            rem.unwrap().iter().for_each(|x| {
+                pen = pen + min_distance_point_set(&x, &small);
+            });
+            let penalty_complex = dmax_abs(&union) * pen;
+            dis = idis_simple(set1, set2) + penalty_complex;
         }
     };
     return dis;
@@ -99,9 +114,9 @@ pub fn idis_rec(set1:&Vec<String>,set2:&Vec<String>) -> i32 {
     let mut dis = 0;
     let mut union = set1.clone();
     let y = set2.clone();
+    union.extend(y);
     let mut small:Vec<String> = Vec::new();
     let mut big:Vec<String> = Vec::new();
-    union.extend(y);
 
     let opt_inj_function = utils::get_opt_fun(set1, set2);
     let rem = utils::get_remain_set(set1, set2, &opt_inj_function);
@@ -122,10 +137,46 @@ pub fn idis_rec(set1:&Vec<String>,set2:&Vec<String>) -> i32 {
         },
         false => {
             let n_rem = rem.as_ref().unwrap().len() as i32;
-            let penalty = dmax_abs(&union) * n_rem;
+            // let penalty = dmax_abs(&union) * n_rem;
+            let penalty = 0 * n_rem;
             dis = idis_simple(set1, set2) + penalty;
             dis = dis+ idis_rec(&rem.as_ref().unwrap(), &small);
         }
     };
     return dis;
 }
+
+pub fn rep_dis(set1:&Vec<String>,set2:&Vec<String>) -> i32 {
+   let mut dis = 0; 
+   let mut small:Vec<String> = Vec::new();
+   let mut big:Vec<String> = Vec::new();
+   let mut union = set1.clone();
+   let y = set2.clone();
+   union.extend(y);
+
+   let opt_inj_function = utils::get_opt_fun(set1, set2);
+   let rem = utils::get_remain_set(set1, set2, &opt_inj_function);
+
+   if set1.len()<=set2.len(){
+       small = set1.clone();
+       big = set2.clone();
+   }else {
+       small = set2.clone();
+       big = set1.clone();
+   }
+   match set1.len()==set2.len() {
+       true => {
+           // println!("Iguales");
+           dis = idis_simple(set1, set2);
+       },
+       false => {
+           let n_rem = rem.as_ref().unwrap().len() as i32;
+           let penalty = n_rem * idis_simple(&rem.unwrap(), &small);
+           dis = idis_simple(set1, set2) + penalty;
+           println!("IDIS = {}; Pen= {}",idis_simple(set1, set2),penalty );
+       }
+   };
+   return dis;
+   
+}
+

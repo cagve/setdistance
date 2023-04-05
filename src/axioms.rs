@@ -1,6 +1,8 @@
 use std::vec;
 
-use crate::{utils::is_far, distances::{idis, dmax_rel, dmin_rel}};
+use distance::hamming;
+
+use crate::{utils::{is_far, get_opt_fun, get_remain_set}, distances::{idis, dmax_rel, dmin_rel, self}};
 
 
 pub fn id (set1: &Vec<String>, dis: fn(&Vec<String>,&Vec<String>) -> i32) -> Option<Vec<Vec<String>>> {
@@ -25,6 +27,7 @@ pub fn triangle_inequality(set1: &Vec<String>, set2: &Vec<String>, set3:&Vec<Str
     let distance1 = dis(set1,  set3);
     let distance2 = dis(set1,  set2);
     let distance3 = dis(set2,  set3);
+    println!("D(X,Y)={:?} + D(Y,Z)={:?} >= D(X,Z)={:?}", distance2, distance3, distance1);
 
     if distance1 > distance2 + distance3{
         return Some(vec![set1.to_vec(),set2.to_vec(),set3.to_vec()]);
@@ -69,22 +72,22 @@ pub fn ax7(set1: &Vec<String>,set2: &Vec<String>,set3:&Vec<String>,set4:&Vec<Str
 
 
     // DEBUG
-    // println!("DMAX(X,Y) = {:?} ", dmax_rel(set1, set2));
-    // println!("DMAX(X',X') = {:?} ", dmax_rel(set3, set3));
-    // println!("DMAX(X'', X'') = {:?} ", dmax_rel(set4, set4));
-    //
-    // println!("dmin(XY,X') = {:?} ", dmin_rel(&unionx1, set3));
-    // println!("dmin(XY,X'') = {:?} ", dmin_rel(&unionx1, set4));
-    //
-    // println!("isfarXY X' = {:?} ", is_far(set1,set2, set3));
-    // println!("isfarXY X'' = {:?} ", is_far(set1,set2, set4));
-    //
-    // println!("X'== X'' {:?} ", set3.len()==set4.len());
-    // println!("isfarXY X'' = {:?} ", is_far(set1,set2, set4));
-    //
-    // println!("D(X,Y)={:?}", idis(&set1, &set2));
-    // println!("D(X',Y)={:?}", idis(&set2,&set3));
-    // println!("D(X'',Y)={:?}", idis(&set2,&set4));
+    println!("DMAX(X,Y) = {:?} ", dmax_rel(set1, set2));
+    println!("DMAX(X',X') = {:?} ", dmax_rel(set3, set3));
+    println!("DMAX(X'', X'') = {:?} ", dmax_rel(set4, set4));
+
+    println!("dmin(XY,X') = {:?} ", dmin_rel(&unionx1, set3));
+    println!("dmin(XY,X'') = {:?} ", dmin_rel(&unionx1, set4));
+
+    println!("isfarXY X' = {:?} ", is_far(set1,set2, set3));
+    println!("isfarXY X'' = {:?} ", is_far(set1,set2, set4));
+
+    println!("X'== X'' {:?} ", set3.len()==set4.len());
+    println!("isfarXY X'' = {:?} ", is_far(set1,set2, set4));
+
+    println!("D(X,Y)={:?}", idis(&set1, &set2));
+    println!("D(X',Y)={:?}", idis(&set2,&set3));
+    println!("D(X'',Y)={:?}", idis(&set2,&set4));
 
     if is_far(set1,set2,set3) && is_far(set1,set2,set4) && set3.len() == set4.len() && dis(set2,set3)<dis(set2,set4) {
         let mut unionx1 = set1.clone();
@@ -93,8 +96,19 @@ pub fn ax7(set1: &Vec<String>,set2: &Vec<String>,set3:&Vec<String>,set4:&Vec<Str
         unionx1.extend(set3.clone());
         unionx2.extend(set4.clone());
         
-        // println!("D(X',Y)={:?} < D(X'',Y)={:?}", idis(set3,set2), idis(set4,set2));
-        // println!("D(XX',Y)={:?} < D(XX'',Y)={:?}", idis(&unionx1,set2), idis(&unionx2,set2));
+        // println!("Opt(XX0Y)={:?}", get_opt_fun(set1, set2));
+        // println!("Opt(XX1Y)={:?}", get_opt_fun(&unionx1, set2));
+        // println!("Opt(XX2Y)={:?}", get_opt_fun(&unionx2, set2));
+        println!("Opt(X1Y)={:?}", get_opt_fun(set3, set2));
+        get_opt_fun(set3, set2).iter().for_each(|x|{
+            println!("{}", hamming(&x.0, &x.1).unwrap());
+        });
+        println!("Opt(X2Y)={:?}", get_opt_fun(set4, set2));
+        get_opt_fun(set4, set2).iter().for_each(|x|{
+            println!("{}", hamming(&x.0, &x.1).unwrap());
+        });
+        println!("D(X',Y)={:?} < D(X'',Y)={:?}", dis(set3,set2), dis(set4,set2));
+        println!("D(XX',Y)={:?} < D(XX'',Y)={:?}", dis(&unionx1,set2), dis(&unionx2,set2));
 
         if dis(&unionx1,&set2) >= dis(&unionx2,&set2) {
             println!("Counterexaple:");
