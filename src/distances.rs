@@ -104,7 +104,7 @@ pub fn idis(set1:&Vec<String>,set2:&Vec<String>) -> i32 {
                 pen = pen + min_distance_point_set(&x, &small);
             });
             let penalty_complex = dmax_abs(&union) * pen;
-            dis = idis_simple(set1, set2) + penalty_complex;
+            dis = idis_simple(set1, set2) + penalty_simple;
         }
     };
     return dis;

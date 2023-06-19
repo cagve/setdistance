@@ -2,7 +2,6 @@ use distances::idis;
 use rand::{seq::SliceRandom, thread_rng};
 use itertools::Itertools;
 use utils::is_far;
-use utils::get_opt_fun;
 use rand::Rng;
 
 use crate::distances::idis_simple;
@@ -102,7 +101,7 @@ fn generate_val_combinations(length: usize) -> Vec<String> {
 }
 
 fn counter_example() -> bool {
-    let dmax = 20;
+    let dmax = 5;
     let valuations = generate_val_combinations(dmax);
     let set_x:Vec<String> = valuations
         .choose_multiple(&mut rand::thread_rng(), 3)
@@ -110,7 +109,12 @@ fn counter_example() -> bool {
         .collect();
 
     let mut set_y:Vec<String> = valuations
-        .choose_multiple(&mut rand::thread_rng(), 6)
+        .choose_multiple(&mut rand::thread_rng(), 4)
+        .map(|x| x.to_string())
+        .collect();
+
+    let mut set_Z:Vec<String> = valuations
+        .choose_multiple(&mut rand::thread_rng(), &mut rand::thread_rng(3..25))
         .map(|x| x.to_string())
         .collect();
 
@@ -120,6 +124,7 @@ fn counter_example() -> bool {
     println!("{:?}", set_x);
     println!("{:?}", set_y);
     println!("{:?}", set_z);
+    println!("{:?}", set_Z);
 
 
     if set_x.iter().any(|e| set_y.contains(e)) {
@@ -135,10 +140,9 @@ fn counter_example() -> bool {
         //Join Y and z. 
         set_y.append(&mut set_z);
         let result_xz = idis(&set_y, &set_x);
-        println!("R =================="); 
         println!("Result D(X,YUZ)={}",result_xy); 
         println!("Result D(X,YUz)={}",result_xz); 
-        if result_xz >= result_xy as i32 {
+        if result_xz > result_xy as i32 {
             return true
         }else{
             return false 
@@ -228,27 +232,14 @@ fn is_metric(valuations:Vec<String>, limit:usize, dis:fn(&Vec<String>,&Vec<Strin
 }
 
 fn main() {
-    // println!("{}", counter_example());
-    let val1 = vec!["000110".to_string(), "000101".to_string(), "000111".to_string()];
-    let valz = vec!["111101".to_string(), "111000".to_string(), "111001".to_string(), "111010".to_string(), "111100".to_string()];
-    let valZ = vec!["000110".to_string(), "000101".to_string(), "000111".to_string(), "111000".to_string(), "111001".to_string(), "111010".to_string(), "111100".to_string()]; 
+    println!("{}", counter_example());
 
-
-    println!("D(X,YUZ): {}", idis(&val1, &valZ));
-    println!("D(X,YUz): {}", idis(&val1, &valz));
-    println!("Opt(X,YUZ): {}", idis_simple(&val1, &valZ));
-    println!("Opt(X,YUz): {}", idis_simple(&val1, &valz));
-    println!("Opt(X,YUZ): {:?}", get_opt_fun(&val1, &valZ));
-    println!("Opt(X,YUz): {:?}", get_opt_fun(&val1, &valz));
-
-
-
-    // loop{
-    //    match counter_example() {
-    //         true => break,
-    //         false =>{}
-    //    } 
-    // }
+    loop{
+       match counter_example() {
+            true => break,
+            false =>{}
+       } 
+    }
         
     // let combinations = generate_val_combinations(2);
     // is_metric(combinations, 50, distances::idis_rec);

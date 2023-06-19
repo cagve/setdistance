@@ -22,4 +22,12 @@ let val3 = vec! ["011".to_string(), "000".to_string(), "111".to_string(), "010".
  counterexample: Some([["01"], ["11", "00"], ["01", "11", "10", "00"]])
  ```
  
+# Counterexample 19-06-2023
+## Axiom 9-9'
+
+```
+let val1 = vec!["000110".to_string(), "000101".to_string(), "000111".to_string()];
+let valz = vec!["111101".to_string(), "111000".to_string(), "111001".to_string(), "111010".to_string(), "111100".to_string()];
+let valZ = vec!["000110".to_string(), "000101".to_string(), "000111".to_string(), "111000".to_string(), "111001".to_string(), "111010".to_string(), "111100".to_string()]; 
+```
 
