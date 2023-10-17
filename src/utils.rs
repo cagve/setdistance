@@ -1,4 +1,4 @@
-use std::{collections::HashSet, vec};
+use std::{collections::HashSet, vec, net::ToSocketAddrs};
 use distance::hamming;
 use itertools::Itertools;
 use rand::{thread_rng, Rng};
@@ -121,4 +121,15 @@ pub fn is_far(set1:&Vec<String>,set2:&Vec<String>, set3:&Vec<String>) -> bool{
 pub fn remove_duplicates<T: Eq + std::hash::Hash>(vec: &mut Vec<T>){
   let set: HashSet<_> = vec.drain(..).collect();
   vec.extend(set.into_iter());
+}
+
+pub fn are_disjoint(set1:&Vec<String>,set2:&Vec<String>) -> bool{
+    for x in set1.iter() {
+        for y in set2.iter(){
+            if x == y{
+                return false;
+            }
+        }
+    }
+    return true;
 }

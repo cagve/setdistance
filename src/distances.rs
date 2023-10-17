@@ -10,7 +10,7 @@ pub fn dmax_abs(set:&Vec<String>) -> i32{
     return val as i32;
 }
 
-//relative
+//relative: Return dmax between two poitns of set1 and set2
 pub fn dmax_rel(set1:&Vec<String>,set2:&Vec<String>) -> i32{
     let mut max = 0;
     set1.iter().for_each(|x_val|{
@@ -24,6 +24,7 @@ pub fn dmax_rel(set1:&Vec<String>,set2:&Vec<String>) -> i32{
     return max as i32;
 }
 
+//relative: Return dmin between two poitns of set1 and set2
 pub fn dmin_rel(set1:&Vec<String>,set2:&Vec<String>) ->i32{
     let mut min = dmax_rel(set1, set2) as usize;
     set1.iter().for_each(|x_val|{
@@ -98,13 +99,13 @@ pub fn idis(set1:&Vec<String>,set2:&Vec<String>) -> i32 {
         },
         Some(..) => {
             let n_rem = rem.as_ref().unwrap().len() as i32;
-            let penalty_simple = dmax_abs(&union) * n_rem;
             let mut pen = 0;
             rem.unwrap().iter().for_each(|x| {
                 pen = pen + min_distance_point_set(&x, &small);
             });
-            let penalty_complex = dmax_abs(&union) * pen;
-            dis = idis_simple(set1, set2) + penalty_simple;
+            let penalty_complex = dmax_abs(&set1) * pen;
+            // dis = idis_simple(set1, set2) + penalty_simple; THIS CASE IS WRONG
+            dis = idis_simple(set1, set2) + penalty_complex;
         }
     };
     return dis;

@@ -120,3 +120,69 @@ pub fn ax7(set1: &Vec<String>,set2: &Vec<String>,set3:&Vec<String>,set4:&Vec<Str
     }
     return None;
 }
+
+pub fn ax6(set1: &Vec<String>,set2: &Vec<String>,set3:&Vec<String>,set4:&Vec<String>,dis: fn(&Vec<String>,&Vec<String>) -> i32) -> Option<Vec<Vec<String>>> {
+    let mut set23 = set2.clone();
+    let mut set24 = set2.clone();
+
+    set23.extend(set3.clone());
+    set24.extend(set4.clone());
+
+    if set3.len() == set4.len() && dis(set1, set3) < dis(set1,set4) {
+        if dis(set1,&set23) > dis(set1,&set24) { //counterexample
+            println!("Counterexaple:");
+            println!("{:?}", vec![set1.to_vec(),set2.to_vec(),set3.to_vec(),set4.to_vec()]);
+            return Some(vec![set1.to_vec(),set2.to_vec(),set3.to_vec(),set4.to_vec()]);
+        }else {
+            return None;
+        }
+    }else {
+        return None;
+    }
+}
+
+pub fn ax6_1(set1: &Vec<String>,set2: &Vec<String>,set3:&Vec<String>,set4:&Vec<String>,dis: fn(&Vec<String>,&Vec<String>) -> i32) -> Option<Vec<Vec<String>>> {
+    let mut set23 = set2.clone();
+    let mut set24 = set2.clone();
+
+    set23.extend(set3.clone());
+    set24.extend(set4.clone());
+
+    if set3.len() == set4.len() &&dis(set1,set3) < dis(set1,set2) && dis(set1, set3) < dis(set1,set4) {
+        if dis(set1,&set23) > dis(set1,&set24) { //counterexample
+            println!("Counterexaple:");
+            println!("{:?}", vec![set1.to_vec(),set2.to_vec(),set3.to_vec(),set4.to_vec()]);
+            return Some(vec![set1.to_vec(),set2.to_vec(),set3.to_vec(),set4.to_vec()]);
+        }else {
+            println!("Applied but no counterexaple:");
+            return None;
+        }
+    }else {
+        return None;
+    }
+}
+
+pub fn ax6_2(set1: &Vec<String>,set2: &Vec<String>,set3:&Vec<String>,set4:&Vec<String>,dis: fn(&Vec<String>,&Vec<String>) -> i32) -> Option<Vec<Vec<String>>> {
+    let mut set23 = set2.clone();
+    let mut set24 = set2.clone();
+
+    set23.extend(set3.clone());
+    set24.extend(set4.clone());
+
+    let dmax_xz = dmax_rel(set1, set3);
+    let dmin_xy = dmin_rel(set1, set2);
+
+    if set3.len() == set4.len() && dis(set1,set3) < dis(set1,set2) && dmax_xz < dmin_xy{
+        if dis(set1,&set23) > dis(set1,&set24) { //counterexample
+            println!("Counterexaple:");
+            println!("{:?}", vec![set1.to_vec(),set2.to_vec(),set3.to_vec(),set4.to_vec()]);
+            return Some(vec![set1.to_vec(),set2.to_vec(),set3.to_vec(),set4.to_vec()]);
+        }else {
+            return None;
+        }
+    }else {
+        return None;
+    }
+}
+
+
