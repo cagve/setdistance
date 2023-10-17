@@ -10,6 +10,8 @@ pub fn dmax_abs(set:&Vec<String>) -> i32{
     return val as i32;
 }
 
+
+
 //relative
 pub fn dmax_rel(set1:&Vec<String>,set2:&Vec<String>) -> i32{
     let mut max = 0;
@@ -36,6 +38,21 @@ pub fn dmin_rel(set1:&Vec<String>,set2:&Vec<String>) ->i32{
 
     return min as i32;
 }
+
+pub fn andreas_distance(set1:&Vec<String>,set2:&Vec<String>) -> i32{
+    let mut sum = 0;
+    set1.iter().for_each(|x_val|{
+        let min = min_distance_point_set(&x_val, set2);
+        sum = sum+min;
+    });
+    set2.iter().for_each(|x_val|{
+        let min = min_distance_point_set(&x_val, set1);
+        sum = sum+min;
+    });
+
+    return sum;
+}
+
 
 pub fn min_distance_point_set(point: &String, set:&Vec<String>) -> i32{
     let mut ham = 0;
@@ -110,6 +127,43 @@ pub fn idis(set1:&Vec<String>,set2:&Vec<String>) -> i32 {
     return dis;
 }
 
+pub fn idis_semi_rec(set1:&Vec<String>,set2:&Vec<String>) -> i32 {
+    let mut dis = 0;
+    let mut union = set1.clone();
+    let y = set2.clone();
+    union.extend(y);
+    let mut small:Vec<String> = Vec::new();
+    let mut big:Vec<String> = Vec::new();
+
+    let opt_inj_function = utils::get_opt_fun(set1, set2);
+    let rem = utils::get_remain_set(set1, set2, &opt_inj_function);
+
+    if set1.len()<=set2.len(){
+        small = set1.clone();
+        big = set2.clone();
+    }else {
+        small = set2.clone();
+        big = set1.clone();
+    }
+    
+    // in this case dmax is over the domain of set1\cup set2
+    match set1.len()==set2.len() {
+        true => {
+            dis = idis_simple(set1, set2);
+        },
+        false => {
+            let opt_inj_function = utils::get_opt_fun(rem.as_ref().unwrap(), &big);
+            let mut penalty = 0;
+            opt_inj_function.iter().for_each(|x|{
+                let current_pen = dmax_abs(&union) as usize + hamming(&x.0, &x.1).unwrap() as usize;
+                penalty = penalty + current_pen;
+            });
+            dis = idis_simple(&small, &big) +  penalty as i32;
+        }
+    };
+    return dis;
+}
+
 pub fn idis_rec(set1:&Vec<String>,set2:&Vec<String>) -> i32 {
     let mut dis = 0;
     let mut union = set1.clone();
@@ -137,8 +191,8 @@ pub fn idis_rec(set1:&Vec<String>,set2:&Vec<String>) -> i32 {
         },
         false => {
             let n_rem = rem.as_ref().unwrap().len() as i32;
-            // let penalty = dmax_abs(&union) * n_rem;
-            let penalty = 0 * n_rem;
+            let penalty = dmax_abs(&union) * n_rem;
+            // let penalty = 0 * n_rem;
             dis = idis_simple(set1, set2) + penalty;
             dis = dis+ idis_rec(&rem.as_ref().unwrap(), &small);
         }
@@ -180,3 +234,47 @@ pub fn rep_dis(set1:&Vec<String>,set2:&Vec<String>) -> i32 {
    
 }
 
+pub fn g_average(set1:&Vec<String>, set2:&Vec<String>) -> f64  {
+    let mut dis = 0 as f64;
+
+    let mut setx = set1.clone();
+    let mut sety = set2.clone();
+
+    setx.retain(|x| !set2.contains(x));
+    sety.retain(|x| !set1.contains(x));
+
+    // g(X,Y)
+    set1.iter().for_each(|x|{
+        set2.iter().for_each(|y| {
+            let h = hamming(x, y).unwrap();
+            dis = dis + h as f64;
+            println!("Distance {} - {}={}", x,y,h);
+        })
+    });
+
+    let sup = dis as f64;
+    let inf = (set1.len() * set2.len()) as f64;
+    dis = sup/inf;
+    return dis as f64;
+}
+
+pub fn average_dis(set1:&Vec<String>, set2:&Vec<String>) -> f64  {
+    let dis;
+
+    let mut setx = set1.clone();
+    let mut sety = set2.clone();
+
+    // X\Y
+    setx.retain(|x| !set2.contains(x));
+    sety.retain(|x| !set1.contains(x));
+
+    let cardinalunion = (set1.len() + set2.len()) as f64;
+    let shortsetx = setx.len() as f64;
+    let shortsety = sety.len() as f64;
+
+
+    let disfirst = (shortsety/cardinalunion) * g_average(set1, &sety);
+    let dissecond = (shortsetx/cardinalunion) * g_average(set2, &setx);
+    dis = disfirst + dissecond;
+    return dis as f64;
+}

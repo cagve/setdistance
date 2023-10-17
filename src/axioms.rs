@@ -2,7 +2,7 @@ use std::vec;
 
 use distance::hamming;
 
-use crate::{utils::{is_far, get_opt_fun, get_remain_set}, distances::{idis, dmax_rel, dmin_rel, self}};
+use crate::{utils::{is_far, get_opt_fun, get_remain_set}, distances::{idis, dmax_rel, average_dis, dmin_rel, self}};
 
 
 pub fn id (set1: &Vec<String>, dis: fn(&Vec<String>,&Vec<String>) -> i32) -> Option<Vec<Vec<String>>> {
@@ -38,8 +38,6 @@ pub fn triangle_inequality(set1: &Vec<String>, set2: &Vec<String>, set3:&Vec<Str
 
 pub fn ax1(set1: &Vec<String>,set2: &Vec<String>,set3:&Vec<String>,set4:&Vec<String>,dis: fn(&Vec<String>,&Vec<String>) -> i32) -> Option<Vec<Vec<String>>> {
     if is_far(set1, set2, set3) && is_far(set1, set2, set4) && set3.len()==set4.len() && dis(set3,set4)>0{
-        // println!("Se puede aplicar axioma 1 en el siguiente caso:");
-        // println!("X={:?}, Y={:?}, X'={:?}, Y'={:?}", set1,set2,set3,set4);
         let disxy = dis(set1,set2);
 
         let mut unionx = set1.clone();
@@ -119,4 +117,25 @@ pub fn ax7(set1: &Vec<String>,set2: &Vec<String>,set3:&Vec<String>,set4:&Vec<Str
         }
     }
     return None;
+}
+
+pub fn axiom4(set1: &Vec<String>,set2: &Vec<String>,set3: &Vec<String>,set4: &Vec<String>,dis: fn(&Vec<String>,&Vec<String>) -> f64) -> Option<Vec<Vec<String>>> {
+    // if dmin_rel(set3, set4) < dmax_rel(set1,set2){
+    //     return None;
+    // }else {
+        if dis(set1, set2) > dis(set3, set4) {
+            if dmin_rel(set3, set4) < dmax_rel(set1,set2){
+                println!("D(X,Y) = {:?}", dis(set1,set2));
+                println!("D(X',Y') = {:?}", dis(set3,set4));
+                println!("Strectch(X,Y) = {:?}", dmax_rel(set1,set2));
+                println!("Shrink(X',Y') = {:?}", dmin_rel(set3,set4));
+                return Some(vec![set1.to_vec(),set2.to_vec(),set3.to_vec(),set4.to_vec()]);
+            }
+            else {
+                return None; 
+            }
+        }else {
+            return None; 
+        };
+    // };
 }

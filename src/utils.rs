@@ -122,3 +122,4 @@ pub fn remove_duplicates<T: Eq + std::hash::Hash>(vec: &mut Vec<T>){
   let set: HashSet<_> = vec.drain(..).collect();
   vec.extend(set.into_iter());
 }
+

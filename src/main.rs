@@ -2,13 +2,13 @@ use distances::idis;
 use rand::{seq::SliceRandom, thread_rng};
 use itertools::Itertools;
 use utils::is_far;
-use utils::get_opt_fun;
 use rand::Rng;
+use strict_implication::get_worlds;
 
-use crate::distances::idis_simple;
 mod distances;
 mod axioms;
 mod utils;
+mod strict_implication;
 
 
 struct MetricSpace<T> {
@@ -164,7 +164,7 @@ fn test_ax(n_val:usize, max:usize) {
         let set2 = pow.get(rng.gen_range(0..limit-1)).unwrap();
         let set3 = pow.get(rng.gen_range(0..limit-1)).unwrap();
         let set4 = pow.get(rng.gen_range(0..limit-1)).unwrap();
-        match axioms::ax7(&set1, &set2, &set3, &set4, distances::idis) {
+        match axioms::axiom4(&set1, &set2, &set3, &set4, distances::average_dis) {
            Some(_)  => {
                println!("CASE {}: X={:?}, Y={:?}, X'={:?},X''={:?},", n, set1,set2,set3,set4);
                break;
@@ -219,7 +219,7 @@ fn is_metric(valuations:Vec<String>, limit:usize, dis:fn(&Vec<String>,&Vec<Strin
                 break;
             },
             None => {
-                // println!("NO {:?}{:?}{:?}",set1,set2,set3 );
+                println!("NO {:?}{:?}{:?}",set1,set2,set3 );
             }
         }
     }
@@ -228,69 +228,6 @@ fn is_metric(valuations:Vec<String>, limit:usize, dis:fn(&Vec<String>,&Vec<Strin
 }
 
 fn main() {
-    // println!("{}", counter_example());
-    let val1 = vec!["000110".to_string(), "000101".to_string(), "000111".to_string()];
-    let valz = vec!["111101".to_string(), "111000".to_string(), "111001".to_string(), "111010".to_string(), "111100".to_string()];
-    let valZ = vec!["000110".to_string(), "000101".to_string(), "000111".to_string(), "111000".to_string(), "111001".to_string(), "111010".to_string(), "111100".to_string()]; 
-
-
-    println!("D(X,YUZ): {}", idis(&val1, &valZ));
-    println!("D(X,YUz): {}", idis(&val1, &valz));
-    println!("Opt(X,YUZ): {}", idis_simple(&val1, &valZ));
-    println!("Opt(X,YUz): {}", idis_simple(&val1, &valz));
-    println!("Opt(X,YUZ): {:?}", get_opt_fun(&val1, &valZ));
-    println!("Opt(X,YUz): {:?}", get_opt_fun(&val1, &valz));
-
-
-
-    // loop{
-    //    match counter_example() {
-    //         true => break,
-    //         false =>{}
-    //    } 
-    // }
-        
-    // let combinations = generate_val_combinations(2);
-    // is_metric(combinations, 50, distances::idis_rec);
-    // let mut pow = generate_random_subsets(&combinations, 100);
-    // pow.retain(|x| !x.is_empty());
-    // println!("{:?}", combinations);
-    // println!("Comb size = {}, Pow size={}", combinations.len(), pow.len());
-    
-    // let val1 = vec!["01".to_string()];
-    // let val2 = vec!["11".to_string(), "00".to_string()];
-    // let val3 = vec!["01".to_string(), "11".to_string(), "10".to_string(), "00".to_string()];
-    //
-    // let sat = axioms::triangle_inequality(&val1, &val2, &val3, distances::idis_rec);
-    // println!("{:?}", sat);
-
-    // / let val1 = vec!["100000011111".to_string()];
-    // let val2 = vec!["000000000000".to_string(), "100010011111".to_string(), "100001011111".to_string(),"100000111111".to_string()];
-    // let val3 = vec!["110000000000".to_string(), "111000000000".to_string(),"111100000000".to_string()];
-    // let val4 = vec!["010000000000".to_string(), "011000000000".to_string(),"011100000000".to_string()];
-    // println!("D(X',Y)")
-    //
-    // let val1 = vec!["1000000111111111111".to_string(), "1000100111111111111".to_string(), "1000010111111111111".to_string(),"1000001111111111111".to_string()];
-    // let val2 = vec!["0000000000001111111".to_string(), "1000100111111111111".to_string(), "1000010111111111111".to_string(),"1000001111111111111".to_string()];
-    // let val3 = vec!["1100000000000000000".to_string(), "1110000000000000000".to_string(),"1111000000000000000".to_string()];
-    // let val4 = vec!["0100000000000000000".to_string(), "0110000000000000000".to_string(),"0111000000000000000".to_string()];
-    //
-    // let sat = axioms::ax7(&val1, &val2, &val3,&val4, distances::rep_dis);
-    // println!("{:?}", sat);
-
-    // let sat = axioms::ax7(&val1, &val2, &val3,&val4, distances::idis);
-    // println!("{:?}", sat);
-
-    // let dis = distances::idis_rec(&val1, &val3);
-
-    // for x in pow.iter().combinations(4){
-    //     let set1 = x.get(0).unwrap();
-    //     let set2 = x.get(1).unwrap();
-    //     let set3 = x.get(2).unwrap();
-    //     let set4 = x.get(3).unwrap();
-    //     axioms::ax1(set1, set2, set3, set4,idis);
-    // }
-    // sat_axiom(&pow, distances::idis);
-    // debug(3);
-    // test_ax(4,500);
+    let combinations = generate_val_combinations(4);
+    is_metric(combinations, 2, distances::idis_semi_rec);
 }
