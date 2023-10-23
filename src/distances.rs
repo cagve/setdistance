@@ -2,7 +2,7 @@ use std::{thread, time};
 
 use distance::hamming;
 use itertools::Itertools;
-use crate::utils::{set_functions, is_injective, inj_distance, self};
+use crate::utils::{set_functions, is_injective, inj_distance, self, cover, difference};
 
 //absolute
 pub fn dmax_abs(set:&Vec<String>) -> i32{
@@ -107,25 +107,14 @@ pub fn idis(set1:&Vec<String>,set2:&Vec<String>) -> i32 {
     let opt_inj_function = utils::get_opt_fun(set1, set2);
     let rem = utils::get_remain_set(set1, set2, &opt_inj_function);
     
-    // in this case dmax is over the domain of set1\cup set2
-    match rem {
-        None => {
-            dis = idis_simple(set1, set2);
-        },
-        Some(..) => {
-            let n_rem = rem.as_ref().unwrap().len() as i32;
-            let mut pen = 0;
-            rem.unwrap().iter().for_each(|x| {
-                pen = pen + min_distance_point_set(&x, &small);
-            });
-            let penalty_complex = dmax_abs(&union) * pen;
-            dis = idis_simple(set1, set2) + penalty_simple;
-        }
-    };
+    let n_rem = rem.as_ref().unwrap().len() as i32;
+    let penalty_complex = dmax_abs(set1) * n_rem;
+    dis = idis_simple(set1, set2) + penalty_complex;
     return dis;
 }
 
-pub fn idis_semi_rec(set1:&Vec<String>,set2:&Vec<String>) -> i32 {
+pub fn double_i_dis(set1:&Vec<String>,set2:&Vec<String>) -> i32 {
+    //DOUBLE INJECTION OVER THE REMAINING SET
     let mut dis = 0;
     let mut union = set1.clone();
     let y = set2.clone();
@@ -275,4 +264,33 @@ pub fn average_dis(set1:&Vec<String>, set2:&Vec<String>) -> f64  {
     let dissecond = (shortsetx/cardinalunion) * g_average(set2, &setx);
     dis = disfirst + dissecond;
     return dis as f64;
+}
+
+
+// ZONE
+// Cover(X, x) = the sum of the distances between x and every element of X
+// Proxy(X, Y) = Min{ d(x,y) + Cover(X\Y, x) + Cover(Y\X, y) : x in X, y in Y }.
+pub fn proxy(set1:&Vec<String>, set2:&Vec<String>) -> i32 {
+    let mut result = 100 as i32;
+    let mut d;
+    let mut x = "0";
+    let mut y = "0";
+
+    for point_x in set1 {
+        for point_y in set2 {
+            let cover_x = cover(&difference(&set1, &set2), point_x.to_string()) as i32;
+            let cover_y = cover(&difference(&set2, &set1), point_y.to_string()) as i32;
+            d = cover_x + cover_y + hamming(point_x, point_y).unwrap() as i32;
+            if d < result {
+                result = d;
+                x = point_x;
+                y = point_y;
+            }
+        }
+    }
+    // println!("SetX {:?}", set1);
+    // println!("SetY {:?}", set2);
+    // println!("Result {}", result);
+    // println!("x={:?} y={:?}", x , y);
+    return result as i32;
 }

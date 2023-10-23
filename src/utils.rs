@@ -133,3 +133,30 @@ pub fn are_disjoint(set1:&Vec<String>,set2:&Vec<String>) -> bool{
     }
     return true;
 }
+
+pub fn cover(set1:&Vec<String>, point:String) -> f64  {
+    let mut result = 0;
+    match set1.len() {
+       0 => return result as f64,
+       _ => {
+           set1.iter().for_each(|point_x| {
+               let ham = hamming(&point_x.to_string(), &point.to_string()).unwrap();
+               result = result + ham;
+           });
+       }
+    }
+    return result as f64;
+}
+
+
+pub fn difference(set1:&Vec<String>, set2:&Vec<String>) -> Vec<String>{
+    let mut difference: Vec<String> = Vec::new();
+    
+    for num in set1 {
+        if !set2.contains(&num) {
+            difference.push(num.to_string());
+        }
+    }
+    
+    return difference;
+}

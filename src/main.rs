@@ -1,14 +1,16 @@
 use distances::idis;
-use itertools::Itertools;
-use utils::is_far;
-use rand::Rng;
-use strict_implication::get_worlds;
 
-mod distances;
+use itertools::Itertools;
+use utils::{is_far, remove_duplicates};
+use rand::{Rng, seq::SliceRandom, thread_rng};
+use visualitation::view;
+
+use crate::distances::proxy;
 mod axioms;
 mod distances;
 mod utils;
 mod strict_implication;
+mod visualitation;
 
 struct MetricSpace<T> {
     domain: Vec<T>,
@@ -252,28 +254,29 @@ fn is_metric(valuations: Vec<String>, limit: usize, dis: fn(&Vec<String>, &Vec<S
 }
 
 fn main() {
+    // let set1 = vec!["101".to_string(), "100".to_string()];
+    // let set2 = vec!["110".to_string()];
+    // let set3 = vec!["100".to_string(), "111".to_string()];
+
     let combinations = generate_val_combinations(2);
-    let mut pow = generate_random_subsets(&combinations, 70);
-    println!("========={:?}", pow);
-    for x in pow.iter().combinations(4) {
+    let mut pow = generate_random_subsets(&combinations, 40);
+    remove_duplicates(&mut pow);
+    let metric_set:Vec<_> =  pow.iter().filter(|x| x.len() > 0).collect();
+    let mut counter = 0;
+    for x in metric_set.iter().combinations(4) {
+        println!("========= {}", counter);
+        counter +=1;
         let set1 = x.get(0).unwrap();
         let set2 = x.get(1).unwrap();
         let set3 = x.get(2).unwrap();
-        let set4 = x.get(3).unwrap();
-
-        if are_disjoint(&set3, &set2) {
-            println!("NEW CASE:");
-            println!("{:?}", &set2);
-            println!("{:?}", &set3);
-            continue;
-        }
-
-        if are_disjoint(&set4, &set2) {
-            println!("NEW CASE:");
-            println!("{:?}", &set2);
-            println!("{:?}", &set4);
-            continue;
-        }
-        axioms::ax6(&set1, &set2, &set3, &set4, idis);
+        // let result = axioms::ax6_2(&set1, &set2, &set3, &set4, idis);
+        let result = axioms::sym(&set1, &set2, proxy);
+        match result {
+            Some(_) => {
+                println!("counterexample: {:?}", result);
+                return
+            }, 
+            None => continue
+        };
     }
 }

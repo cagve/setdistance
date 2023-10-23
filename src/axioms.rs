@@ -2,7 +2,7 @@ use std::vec;
 
 use distance::hamming;
 
-use crate::{utils::{is_far, get_opt_fun, get_remain_set}, distances::{idis, dmax_rel, average_dis, dmin_rel, self}};
+use crate::{utils::{is_far, get_opt_fun, get_remain_set, are_disjoint}, distances::{idis, dmax_rel, average_dis, dmin_rel, self}};
 
 
 pub fn id (set1: &Vec<String>, dis: fn(&Vec<String>,&Vec<String>) -> i32) -> Option<Vec<Vec<String>>> {
@@ -126,15 +126,25 @@ pub fn ax6(set1: &Vec<String>,set2: &Vec<String>,set3:&Vec<String>,set4:&Vec<Str
     set23.extend(set3.clone());
     set24.extend(set4.clone());
 
-    if set3.len() == set4.len() && dis(set1, set3) < dis(set1,set4) {
+    //NON DISJOINT OPTION
+    // if set3.len() == set4.len() && dis(set1, set3) < dis(set1,set4) {
+    //DISJOINT OPTION
+    if set3.len() == set4.len() && dis(set1, set3) < dis(set1,set4) && are_disjoint(set2, set3) && are_disjoint(set2, set4) {
         if dis(set1,&set23) > dis(set1,&set24) { //counterexample
-            println!("Counterexaple:");
+            print!("Counterexaple:");
             println!("{:?}", vec![set1.to_vec(),set2.to_vec(),set3.to_vec(),set4.to_vec()]);
+            println!("OPTxz {:?}", get_opt_fun(set1, set3));
+            println!("OPTxz' {:?}", get_opt_fun(set1, set4));
+            println!("Condition 1");
+            println!("D(X,Z) = {}", dis(set1, set3));
+            println!("D(X,Z') = {}", dis(set1, set4));
             return Some(vec![set1.to_vec(),set2.to_vec(),set3.to_vec(),set4.to_vec()]);
         }else {
             return None; 
         };
-    // };
+    };
+
+    return None;
 }
 
 pub fn ax6_1(set1: &Vec<String>,set2: &Vec<String>,set3:&Vec<String>,set4:&Vec<String>,dis: fn(&Vec<String>,&Vec<String>) -> i32) -> Option<Vec<Vec<String>>> {
@@ -144,7 +154,10 @@ pub fn ax6_1(set1: &Vec<String>,set2: &Vec<String>,set3:&Vec<String>,set4:&Vec<S
     set23.extend(set3.clone());
     set24.extend(set4.clone());
 
-    if set3.len() == set4.len() &&dis(set1,set3) < dis(set1,set2) && dis(set1, set3) < dis(set1,set4) {
+    //NON DISJOINT OPTION
+    // if set3.len() == set4.len() && dis(set1, set3) < dis(set1,set4) && dis(set1,set3) < dis(set1,set2) {
+    //DISJOINT OPTION
+    if set3.len() == set4.len() && dis(set1, set3) < dis(set1,set4) && dis(set1,set3) < dis(set1,set2) && are_disjoint(set2, set3) && are_disjoint(set2, set4) {
         if dis(set1,&set23) > dis(set1,&set24) { //counterexample
             println!("Counterexaple:");
             println!("{:?}", vec![set1.to_vec(),set2.to_vec(),set3.to_vec(),set4.to_vec()]);
@@ -168,7 +181,9 @@ pub fn ax6_2(set1: &Vec<String>,set2: &Vec<String>,set3:&Vec<String>,set4:&Vec<S
     let dmax_xz = dmax_rel(set1, set3);
     let dmin_xy = dmin_rel(set1, set2);
 
-    if set3.len() == set4.len() && dis(set1,set3) < dis(set1,set2) && dmax_xz < dmin_xy{
+    // if set3.len() == set4.len() && dis(set1,set3) < dis(set1,set2) && dmax_xz < dmin_xy{
+    //DISJOINT CASE
+    if set3.len() == set4.len() && dis(set1,set3) < dis(set1,set2) && dmax_xz < dmin_xy && are_disjoint(set2, set3) && are_disjoint(set2, set4){
         if dis(set1,&set23) > dis(set1,&set24) { //counterexample
             println!("Counterexaple:");
             println!("{:?}", vec![set1.to_vec(),set2.to_vec(),set3.to_vec(),set4.to_vec()]);
