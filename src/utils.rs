@@ -58,7 +58,6 @@ pub fn is_injective(function:&Vec<(String, String)>) -> bool {
 
 pub fn get_remain_set(set1:&Vec<String>,set2:&Vec<String>, inj_function:&Vec<(String, String)>) -> Option<Vec<String>>{
     if !is_injective(inj_function){
-        println!("Is not an injective function");
         return None;
     }else {
         let mut big:Vec<String> = Vec::new();
@@ -159,4 +158,60 @@ pub fn difference(set1:&Vec<String>, set2:&Vec<String>) -> Vec<String>{
     }
     
     return difference;
+}
+
+
+fn gcd(first: usize, second: usize) -> usize {
+    let mut max = first;
+    let mut min = second;
+    if min > max {
+        let val = max;
+        max = min;
+        min = val;
+    }
+
+    loop {
+        let res = max % min;
+        if res == 0 {
+            return min;
+        }
+
+        max = min;
+        min = res;
+    }
+}
+
+fn factorial(num: i32) -> i32 {
+    match num {
+        0 => 1,
+        1 => 1,
+        _ => factorial(num - 1) * num,
+    }
+}
+
+
+//We denote by Cop(X) a certain number of copies of X, i.e., Cop(X) = { (x, i) : x in X and i in |U|!/|X| }.
+pub fn copy(set1:&Vec<String>) -> Vec<String> {
+    let set_card = set1.len() as i32;
+    let alpha_dom = set1.get(0).unwrap().len();
+    let base:i32 = 2;
+    let dom_card = base.pow(alpha_dom as u32);
+
+    let fact_dom = factorial(dom_card);
+    let n_copies = fact_dom / set_card;
+
+    let mut copy_x = set1.clone();
+    (1..n_copies).for_each(|_|{
+        let mut clone = set1.clone();
+        copy_x.append(&mut clone);
+    });
+
+    println!("set_card = {:?}", set_card);
+    println!("dom_card = {:?}", dom_card);
+    println!("fact_dom = {:?}", fact_dom);
+    println!("n_copies = {:?}", n_copies);
+    println!("set1 = {:?}", set1);
+    println!("copy_x = {:?}", copy_x);
+
+    return copy_x;
 }

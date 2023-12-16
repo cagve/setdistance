@@ -294,3 +294,16 @@ pub fn proxy(set1:&Vec<String>, set2:&Vec<String>) -> i32 {
     // println!("x={:?} y={:?}", x , y);
     return result as i32;
 }
+
+pub fn copy_dis(set1:&Vec<String>, set2:&Vec<String>) -> i32 {
+    let copy_x = utils::copy(set1);
+    let copy_y = utils::copy(set2);
+
+    match set1.len() ==0 && set2.len() ==0{
+        true => return 0,
+        false => {
+            let opt_inj_function = utils::get_opt_fun(&copy_x, &copy_y);
+            return inj_distance(&opt_inj_function);
+        }
+    }
+}

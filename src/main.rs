@@ -5,7 +5,7 @@ use utils::{is_far, remove_duplicates};
 use rand::{Rng, seq::SliceRandom, thread_rng};
 use visualitation::view;
 
-use crate::distances::proxy;
+use crate::distances::{proxy, andreas_distance, copy_dis};
 mod axioms;
 mod distances;
 mod utils;
@@ -253,24 +253,23 @@ fn is_metric(valuations: Vec<String>, limit: usize, dis: fn(&Vec<String>, &Vec<S
     println!("Tri counterexample: {:?}", tri);
 }
 
-fn main() {
-    // let set1 = vec!["101".to_string(), "100".to_string()];
-    // let set2 = vec!["110".to_string()];
-    // let set3 = vec!["100".to_string(), "111".to_string()];
-
+fn test_dis(){
     let combinations = generate_val_combinations(2);
-    let mut pow = generate_random_subsets(&combinations, 40);
+    let mut pow = generate_random_subsets(&combinations, 10);
     remove_duplicates(&mut pow);
     let metric_set:Vec<_> =  pow.iter().filter(|x| x.len() > 0).collect();
     let mut counter = 0;
-    for x in metric_set.iter().combinations(4) {
+    for x in metric_set.iter().combinations(3) {
         println!("========= {}", counter);
         counter +=1;
         let set1 = x.get(0).unwrap();
         let set2 = x.get(1).unwrap();
         let set3 = x.get(2).unwrap();
+        println!("set1 = {:?}", set1);
+        println!("set2 = {:?}", set2);
+        println!("set3 = {:?}", set3);
         // let result = axioms::ax6_2(&set1, &set2, &set3, &set4, idis);
-        let result = axioms::sym(&set1, &set2, proxy);
+        let result = axioms::triangle_inequality(&set1, &set2, &set3, copy_dis);
         match result {
             Some(_) => {
                 println!("counterexample: {:?}", result);
@@ -278,5 +277,29 @@ fn main() {
             }, 
             None => continue
         };
+    }
+}
+
+fn main() {
+    // test_dis();
+    let combinations = generate_val_combinations(2);
+    // let mut pow = generate_random_subsets(&combinations, 5);
+    // remove_duplicates(&mut pow);
+    let metric_set:Vec<_> =  combinations.iter().filter(|x| x.len() > 0).collect();
+    for x in metric_set.iter().combinations(4) {
+        let set1 = x.get(0).unwrap();
+        let set2 = x.get(1).unwrap();
+        let set3 = x.get(2).unwrap();
+        let set4 = x.get(3).unwrap();
+
+        let result = axioms::ax6(&set1, &set2, &set3, &set4, copy_dis);
+        match result {
+            Some(_) => {
+                println!("counterexample: {:?}", result);
+                return
+            }, 
+            None => continue
+        };
+        
     }
 }
