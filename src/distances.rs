@@ -2,7 +2,7 @@ use std::{thread, time};
 
 use distance::hamming;
 use itertools::Itertools;
-use crate::utils::{set_functions, is_injective, inj_distance, self, cover, difference};
+use crate::{utils::{set_functions, is_injective, inj_distance, self, cover, difference}, MetricSpace};
 
 //absolute
 pub fn dmax_abs(set:&Vec<String>) -> i32{
@@ -307,3 +307,25 @@ pub fn copy_dis(set1:&Vec<String>, set2:&Vec<String>) -> i32 {
         }
     }
 }
+
+pub fn realspace(set1:&Vec<String>, set2:&Vec<String>) -> i32{
+    let space = utils::generate_val_combinations(set1.get(0).unwrap().len());
+    let set1_vector = utils::to_vector_space(set1, &space);
+    let set2_vector = utils::to_vector_space(set2, &space);
+    let mut result = 0;
+    let base: i32 = 2;
+    set1_vector.iter().for_each(|x|{
+        set2_vector.iter().for_each(|y|{
+            let mut coordinates = 0;
+            if y > x {
+                coordinates = (y - x) as u32;
+            } else{
+                coordinates = (x - y) as u32;
+            }
+            result = base.pow(coordinates);
+        });
+    });
+
+    return (result as f64).sqrt() as i32;
+}
+

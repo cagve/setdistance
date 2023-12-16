@@ -1,10 +1,34 @@
-use std::{collections::HashSet, vec, net::ToSocketAddrs};
+use std::{collections::HashSet, vec, net::ToSocketAddrs, usize};
 use distance::hamming;
 use itertools::Itertools;
 use rand::{thread_rng, Rng};
 
 use crate::distances::{dmax_rel, dmin_rel};
 
+
+pub fn to_vector_space(set1:&Vec<String>, space: &Vec<String>) -> Vec<usize> {
+    let mut x = space.clone();
+    let mut rvector:Vec<usize> = Vec::new();
+    x.sort();
+
+    x.iter().for_each(|x| {
+        let mut min_d = 10000;
+        set1.iter().for_each(|y|{
+            let distance = hamming(x, y).unwrap();
+            if min_d > distance{
+                min_d = distance
+            }
+        });
+        rvector.push(min_d);
+    });
+    return rvector;
+}
+
+pub fn generate_val_combinations(length: usize) -> Vec<String> {
+    (0..2usize.pow(length as u32))
+        .map(|i| format!("{:0length$b}", i, length = length))
+        .collect()
+}
 
 
 pub fn set_functions(set1:&Vec<String>, set2:&Vec<String>) -> Vec<Vec<(String, String)>> {

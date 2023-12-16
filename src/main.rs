@@ -282,17 +282,21 @@ fn test_dis(){
 
 fn main() {
     // test_dis();
-    let combinations = generate_val_combinations(2);
-    // let mut pow = generate_random_subsets(&combinations, 5);
-    // remove_duplicates(&mut pow);
-    let metric_set:Vec<_> =  combinations.iter().filter(|x| x.len() > 0).collect();
-    for x in metric_set.iter().combinations(4) {
+    let combinations = generate_val_combinations(5);
+    let mut pow = generate_random_subsets(&combinations, 100000);
+    remove_duplicates(&mut pow);
+    let metric_set:Vec<_> =  pow.iter().filter(|x| x.len() > 0).collect();
+    let mut counter = 0;
+    for x in metric_set.iter().combinations(3) {
+        println!("Case {}", counter);
+        counter = counter + 1;
         let set1 = x.get(0).unwrap();
         let set2 = x.get(1).unwrap();
         let set3 = x.get(2).unwrap();
-        let set4 = x.get(3).unwrap();
-
-        let result = axioms::ax6(&set1, &set2, &set3, &set4, copy_dis);
+        println!("Set1 {:?}", set1);
+        println!("Set2 {:?}", set2);
+        println!("Set3 {:?}", set3);
+        let result = axioms::triangle_inequality(&set1, &set2, &set3, distances::realspace);
         match result {
             Some(_) => {
                 println!("counterexample: {:?}", result);
@@ -300,6 +304,5 @@ fn main() {
             }, 
             None => continue
         };
-        
     }
 }

@@ -27,7 +27,7 @@ pub fn triangle_inequality(set1: &Vec<String>, set2: &Vec<String>, set3:&Vec<Str
     let distance1 = dis(set1,  set3);
     let distance2 = dis(set1,  set2);
     let distance3 = dis(set2,  set3);
-    println!("D(X,Y)={:?} + D(Y,Z)={:?} >= D(X,Z)={:?}", distance2, distance3, distance1);
+    // println!("D(X,Y)={:?} + D(Y,Z)={:?} >= D(X,Z)={:?}", distance2, distance3, distance1);
 
     if distance1 > distance2 + distance3{
         return Some(vec![set1.to_vec(),set2.to_vec(),set3.to_vec()]);
