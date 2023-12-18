@@ -282,7 +282,7 @@ fn test_dis(){
 
 fn main() {
     // test_dis();
-    let combinations = generate_val_combinations(5);
+    let combinations = generate_val_combinations(3);
     let mut pow = generate_random_subsets(&combinations, 100000);
     remove_duplicates(&mut pow);
     let metric_set:Vec<_> =  pow.iter().filter(|x| x.len() > 0).collect();
