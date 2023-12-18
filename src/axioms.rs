@@ -23,7 +23,8 @@ pub fn sym (set1: &Vec<String>, set2: &Vec<String>, dis: fn(&Vec<String>,&Vec<St
     }
 }
 
-pub fn triangle_inequality(set1: &Vec<String>, set2: &Vec<String>, set3:&Vec<String>, dis: fn(&Vec<String>,&Vec<String>) -> i32) -> Option<Vec<Vec<String>>> {
+// pub fn triangle_inequality(set1: &Vec<String>, set2: &Vec<String>, set3:&Vec<String>, dis: fn(&Vec<String>,&Vec<String>) -> i32) -> Option<Vec<Vec<String>>> { FOR NORMAL CASES
+pub fn triangle_inequality(set1: &Vec<String>, set2: &Vec<String>, set3:&Vec<String>, dis: fn(&Vec<String>,&Vec<String>) -> f64) -> Option<Vec<Vec<String>>> { //REALSPACE DEFsqrt
     let distance1 = dis(set1,  set3);
     let distance2 = dis(set1,  set2);
     let distance3 = dis(set2,  set3);

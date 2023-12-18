@@ -308,24 +308,27 @@ pub fn copy_dis(set1:&Vec<String>, set2:&Vec<String>) -> i32 {
     }
 }
 
-pub fn realspace(set1:&Vec<String>, set2:&Vec<String>) -> i32{
-    let space = utils::generate_val_combinations(set1.get(0).unwrap().len());
-    let set1_vector = utils::to_vector_space(set1, &space);
-    let set2_vector = utils::to_vector_space(set2, &space);
+pub fn realspace(set1:&Vec<String>, set2:&Vec<String>) -> f64{
+    let set1_vector = utils::to_vector_space(set1);
+    let set2_vector = utils::to_vector_space(set2);
     let mut result = 0;
     let base: i32 = 2;
+    // let mut sum_vec = Vec::new(); //for debugging
+    let mut index = 0;
     set1_vector.iter().for_each(|x|{
-        set2_vector.iter().for_each(|y|{
-            let mut coordinates = 0;
-            if y > x {
-                coordinates = (y - x) as u32;
-            } else{
-                coordinates = (x - y) as u32;
-            }
-            result = base.pow(coordinates);
-        });
+        let mut coordinates = 0;
+        let y = set2_vector.get(index).unwrap();
+        if y > x {
+            coordinates = (y - x) as u32;
+        } else{
+            coordinates = (x - y) as u32;
+        }
+        result = result + base.pow(coordinates);
+        // sum_vec.push(coordinates); //for debugging
+        index = index + 1
     });
+    // println!("sum_vec = {:?}", sum_vec); //for debugginf
 
-    return (result as f64).sqrt() as i32;
+    return (result as f64).sqrt();
 }
 

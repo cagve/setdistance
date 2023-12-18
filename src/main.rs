@@ -5,7 +5,7 @@ use utils::{is_far, remove_duplicates};
 use rand::{Rng, seq::SliceRandom, thread_rng};
 use visualitation::view;
 
-use crate::distances::{proxy, andreas_distance, copy_dis};
+use crate::distances::{proxy, andreas_distance, copy_dis, realspace};
 mod axioms;
 mod distances;
 mod utils;
@@ -239,7 +239,7 @@ fn is_metric(valuations: Vec<String>, limit: usize, dis: fn(&Vec<String>, &Vec<S
         let set1 = x.get(0).unwrap();
         let set2 = x.get(1).unwrap();
         let set3 = x.get(2).unwrap();
-        match axioms::triangle_inequality(set1, set2, set3, dis) {
+        match axioms::triangle_inequality(set1, set2, set3, realspace) {
             Some(x) => {
                 tri = Some(x);
                 break;
@@ -269,7 +269,7 @@ fn test_dis(){
         println!("set2 = {:?}", set2);
         println!("set3 = {:?}", set3);
         // let result = axioms::ax6_2(&set1, &set2, &set3, &set4, idis);
-        let result = axioms::triangle_inequality(&set1, &set2, &set3, copy_dis);
+        let result = axioms::triangle_inequality(&set1, &set2, &set3, realspace);
         match result {
             Some(_) => {
                 println!("counterexample: {:?}", result);
@@ -280,29 +280,58 @@ fn test_dis(){
     }
 }
 
+fn debug_vectors() {
+    let y1 = vec!["01".to_string()] ;
+    let y2 = vec!["10".to_string()] ;
+    let y3 = vec!["11".to_string()] ;
+    let y4 = vec!["01".to_string(), "10".to_string()] ;
+    let y5 = vec!["01".to_string(), "11".to_string()] ;
+    let y6 = vec!["10".to_string(), "11".to_string()] ;
+    let y7 = vec!["01".to_string(), "10".to_string(), "11".to_string()] ;
+
+    let x1 = utils::to_vector_space(&y1);
+    let x2 = utils::to_vector_space(&y2);
+    let x3 = utils::to_vector_space(&y3);
+    let x4 = utils::to_vector_space(&y4);
+    let x5 = utils::to_vector_space(&y5);
+    let x6 = utils::to_vector_space(&y6);
+    let x7 = utils::to_vector_space(&y7);
+
+    println!("y1  = {:?}-{:?}", y1,x1);
+    println!("y2  = {:?}-{:?}", y2,x2);
+    println!("y3  = {:?}-{:?}", y3,x3);
+    println!("y4  = {:?}-{:?}", y4,x4);
+    println!("y5  = {:?}-{:?}", y5,x5);
+    println!("y6  = {:?}-{:?}", y6,x6);
+    println!("y7  = {:?}-{:?}", y7,x7);
+
+}
+
 fn main() {
     // test_dis();
-    let combinations = generate_val_combinations(3);
-    let mut pow = generate_random_subsets(&combinations, 100000);
-    remove_duplicates(&mut pow);
-    let metric_set:Vec<_> =  pow.iter().filter(|x| x.len() > 0).collect();
-    let mut counter = 0;
-    for x in metric_set.iter().combinations(3) {
-        println!("Case {}", counter);
-        counter = counter + 1;
-        let set1 = x.get(0).unwrap();
-        let set2 = x.get(1).unwrap();
-        let set3 = x.get(2).unwrap();
-        println!("Set1 {:?}", set1);
-        println!("Set2 {:?}", set2);
-        println!("Set3 {:?}", set3);
-        let result = axioms::triangle_inequality(&set1, &set2, &set3, distances::realspace);
-        match result {
-            Some(_) => {
-                println!("counterexample: {:?}", result);
-                return
-            }, 
-            None => continue
-        };
-    }
+    debug_vectors();
+    // let combinations = generate_val_combinations(3);
+    // let mut pow = generate_random_subsets(&combinations, 1000);
+    // remove_duplicates(&mut pow);
+    // let metric_set:Vec<_> =  pow.iter().filter(|x| x.len() > 0).collect();
+    // let mut counter = 0;
+    // for x in metric_set.iter().combinations(3) {
+    //     println!("Case {}", counter);
+    //     counter = counter + 1;
+    //     let set1 = x.get(0).unwrap();
+    //     let set2 = x.get(1).unwrap();
+    //     let set3 = x.get(2).unwrap();
+    //     println!("Set1 {:?}", set1);
+    //     println!("Set2 {:?}", set2);
+    //     println!("Set3 {:?}", set3);
+    //     let result = axioms::triangle_inequality(&set1, &set2, &set3, distances::realspace);
+    //     println!("result = {:?}", result);
+    //     match result {
+    //         Some(_) => {
+    //             println!("counterexample: {:?}", result);
+    //             return
+    //         }, 
+    //         None => continue
+    //     };
+    // }
 }
