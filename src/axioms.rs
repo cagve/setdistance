@@ -2,7 +2,7 @@ use std::vec;
 
 use distance::hamming;
 
-use crate::{utils::{is_far, get_opt_fun, get_remain_set, are_disjoint}, distances::{idis, dmax_rel, average_dis, dmin_rel, self}};
+use crate::{utils::{is_far, get_opt_fun, get_remain_set, are_disjoint}, distances::{idis, dmax_rel, average_dis, dmin_rel, self, realspace}};
 
 
 pub fn id (set1: &Vec<String>, dis: fn(&Vec<String>,&Vec<String>) -> i32) -> Option<Vec<Vec<String>>> {
@@ -36,6 +36,24 @@ pub fn triangle_inequality(set1: &Vec<String>, set2: &Vec<String>, set3:&Vec<Str
         return None
     }
 }
+
+
+pub fn ax_singlenton(x: String, y:String,u: String, v:String, dis: fn(&Vec<String>,&Vec<String>) -> f64) -> Option<Vec<Vec<String>>> {
+    if hamming(&x.to_string(), &y.to_string()).unwrap() <= hamming(&u.to_string(), &v.to_string()).unwrap() {
+        let setx = vec![x.to_string()];
+        let sety = vec![y.to_string()];
+        let setu = vec![u.to_string()];
+        let setv = vec![v.to_string()];
+
+        if dis(&setx,&sety) > dis(&setu, &setv){
+            return Some(vec![setx.to_vec(), sety.to_vec(), setu.to_vec(), setv.to_vec()])
+        }
+
+    }
+
+    return None
+}
+
 
 pub fn ax1(set1: &Vec<String>,set2: &Vec<String>,set3:&Vec<String>,set4:&Vec<String>,dis: fn(&Vec<String>,&Vec<String>) -> i32) -> Option<Vec<Vec<String>>> {
     if is_far(set1, set2, set3) && is_far(set1, set2, set4) && set3.len()==set4.len() && dis(set3,set4)>0{

@@ -307,15 +307,45 @@ fn debug_vectors() {
 
 }
 
+fn test_ax_singlenton(){
+    let combinations = generate_val_combinations(9);
+    let mut counter = 0;
+    for x in combinations.iter().combinations(4) {
+        let point1 = x.get(0).unwrap().to_string();
+        let point2 = x.get(1).unwrap().to_string();
+        let point3 = x.get(2).unwrap().to_string();
+        let point4 = x.get(3).unwrap().to_string();
+
+        println!("Case {}", counter);
+        counter = counter + 1;
+        println!("y = {:?}", point1);
+        println!("x = {:?}", point2);
+        println!("u = {:?}", point3);
+        println!("v = {:?}", point4);
+        let result = axioms::ax_singlenton(point1, point2, point3, point4, distances::realspace);
+        println!("result = {:?}", result);
+        match result {
+            Some(_) => {
+                println!("counterexample: {:?}", result);
+                return
+            }, 
+            None => continue
+        };
+    }
+
+}
+
 fn main() {
     // test_dis();
-    debug_vectors();
+    test_ax_singlenton();
+    // debug_vectors();
+    // test_ax_singlenton();
     // let combinations = generate_val_combinations(3);
     // let mut pow = generate_random_subsets(&combinations, 1000);
     // remove_duplicates(&mut pow);
     // let metric_set:Vec<_> =  pow.iter().filter(|x| x.len() > 0).collect();
     // let mut counter = 0;
-    // for x in metric_set.iter().combinations(3) {
+    // for x in metric_set.iter().combinations(2) {
     //     println!("Case {}", counter);
     //     counter = counter + 1;
     //     let set1 = x.get(0).unwrap();
@@ -324,7 +354,7 @@ fn main() {
     //     println!("Set1 {:?}", set1);
     //     println!("Set2 {:?}", set2);
     //     println!("Set3 {:?}", set3);
-    //     let result = axioms::triangle_inequality(&set1, &set2, &set3, distances::realspace);
+    //     let result = axioms::ax_singlenton(&set1, &set2, distances::realspace);
     //     println!("result = {:?}", result);
     //     match result {
     //         Some(_) => {

@@ -7,8 +7,7 @@ use crate::distances::{dmax_rel, dmin_rel};
 
 
 pub fn to_vector_space(set1:&Vec<String>) -> Vec<usize> {
-    // let space = generate_val_combinations(set1.get(0).unwrap().len());
-    let space = vec!["10".to_string(), "01".to_string(), "11".to_string()];
+    let space = generate_val_combinations(set1.get(0).unwrap().len());
     let mut x = space.clone();
     let mut rvector:Vec<usize> = Vec::new();
     x.sort();
