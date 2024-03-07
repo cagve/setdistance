@@ -1,4 +1,6 @@
-use std::{collections::HashSet, vec, net::ToSocketAddrs, usize};
+use std::{fs::File, collections::HashSet};
+use std::fs::OpenOptions;
+use std::io::prelude::*;
 use distance::hamming;
 use itertools::Itertools;
 use rand::{thread_rng, Rng};
@@ -240,3 +242,28 @@ pub fn copy(set1:&Vec<String>) -> Vec<String> {
 
     return copy_x;
 }
+
+pub fn are_equals(set1:&Vec<String>, set2:&Vec<String>) -> bool {
+    if set1.len() != set2.len() {
+        return false;
+    }
+    let result = set1.iter().all(|item| set2.contains(item));
+    return result;
+}
+
+pub fn log(log:String) {
+    let mut file = OpenOptions::new()
+        .write(true)
+        .append(true)
+        .open("tmp.log")
+        .unwrap();
+    let _ = writeln!(file, "");
+}
+
+pub fn vec_difference(v1: &Vec<String>, v2: &Vec<String>) -> Vec<String> {
+    let s1: HashSet<String> = v1.iter().cloned().collect();
+    let s2: HashSet<String> = v2.iter().cloned().collect();
+    (&s1 - &s2).iter().cloned().collect()
+}
+
+
