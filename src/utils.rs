@@ -1,3 +1,4 @@
+use std::collections::BTreeSet;
 use std::{fs::File, collections::HashSet};
 use std::fs::OpenOptions;
 use std::io::prelude::*;
@@ -7,6 +8,7 @@ use rand::{thread_rng, Rng};
 
 use crate::distances::{dmax_rel, dmin_rel};
 
+// Function to pick disjoint subsets of a set represented by a vector
 
 pub fn to_vector_space(set1:&Vec<String>) -> Vec<usize> {
     let space = generate_val_combinations(set1.get(0).unwrap().len());
@@ -265,5 +267,6 @@ pub fn vec_difference(v1: &Vec<String>, v2: &Vec<String>) -> Vec<String> {
     let s2: HashSet<String> = v2.iter().cloned().collect();
     (&s1 - &s2).iter().cloned().collect()
 }
+
 
 

@@ -1,7 +1,7 @@
-use distances::idis;
+use distances::{hausdorff, idis};
 
 use itertools::Itertools;
-use utils::{is_far, remove_duplicates};
+use utils::{inj_distance, is_far, remove_duplicates};
 use rand::{Rng, seq::SliceRandom, thread_rng};
 use visualitation::view;
 use distance::hamming;
@@ -90,6 +90,27 @@ fn powerset_limit<T: Clone>(set: &Vec<T>, limit: usize) -> Vec<Vec<T>> {
         }
     }
     return powerset;
+}
+
+fn generate_random_subsets_conditions(vec: &Vec<String>, n: usize) -> Vec<Vec<String>> {
+    let mut rng = thread_rng();
+    let mut random_subsets: Vec<Vec<String>> = Vec::new();
+    let mut indices: Vec<usize> = (0..vec.len()).collect();
+    let rnd = rng.gen_range(0..vec.len() + 1);
+    for _ in 0..n {
+        indices.shuffle(&mut rng);
+        let subset: Vec<String> = indices
+            .iter()
+            // .take(rng.gen_range(0..vec.len() + 1))
+            .take(rnd)
+            .map(|&i| vec[i].clone())
+            .collect();
+        // if !random_subsets.contains(&subset){
+        random_subsets.push(subset);
+        // }
+    }
+    return random_subsets;
+
 }
 
 fn generate_random_subsets(vec: &Vec<String>, n: usize) -> Vec<Vec<String>> {
@@ -269,7 +290,6 @@ fn test_dis(){
         println!("set1 = {:?}", set1);
         println!("set2 = {:?}", set2);
         println!("set3 = {:?}", set3);
-        // let result = axioms::ax6_2(&set1, &set2, &set3, &set4, idis);
         let result = axioms::triangle_inequality(&set1, &set2, &set3, realspace);
         match result {
             Some(_) => {
@@ -283,160 +303,113 @@ fn test_dis(){
 
 fn test(n: usize) {
     let combinations = generate_val_combinations(n);
+    // let mut pow = generate_random_subsets_conditions(&combinations, 1000);
     let mut pow = generate_random_subsets(&combinations, 1000);
     remove_duplicates(&mut pow);
     let metric_set:Vec<_> =  pow.iter().filter(|x| x.len() > 0).collect();
     let mut counter = 0;
-    for x in metric_set.iter().combinations(4) {
+    for x in metric_set.iter().combinations(2) {
         // Defining my sets
         let set1 = x.get(0).unwrap();
         let set2 = x.get(1).unwrap();
-        let set3 = x.get(2).unwrap();
-        let set4 = x.get(3).unwrap();
-        // println!("Set1 {:?}", set1);
-        // println!("Set2 {:?}", set2);
-        // println!("Set3 {:?}", set3);
-        // println!("Set4 {:?}", set4);
-        // 
-        // Counterexample
+        
         println!("Case {}", counter);
         counter = counter + 1;
-        let result = axioms::ax7_1(&set1, &set2, &set3, distances::full_pivot_distance);
-        match result {
-            Some(_) => {
-                println!("counterexample: {:?}", result);
+        // let result = axioms::p2(&set1, combinations.clone(), hausdorff);
+        let result = axioms::p1(&set1, &set2, idis);
+        match result{
+            true => {
+                continue
+            }
+            false => {
                 return
-            }, 
-            None => continue
-        };
+            }
+        }
+        // match result {
+        //     Some(_) => {
+        //         println!("counterexample: {:?}", result);
+        //         return
+        //     }, 
+        //     None => {
+        //         continue
+        //     }
+        // };
     }
-    // for x in combinations.iter().combinations(4) {
-    //     let point1 = x.get(0).unwrap().to_string();
-    //     let point2 = x.get(1).unwrap().to_string();
-    //     let point3 = x.get(2).unwrap().to_string();
-    //     let point4 = x.get(3).unwrap().to_string();
-    //     counter = counter + 1;
-    //     let result = axioms::ax6(&point1, &point2, &point3,&point4, distances::fujita);
-    //     match result {
-    //         Some(_) => {
-    //             println!("counterexample: {:?}", result);
-    //             return
-    //         }, 
-    //         None => continue
-    //     };
-    // }
-}
-fn debug_vectors() {
-    let y1 = vec!["01".to_string()] ;
-    let y2 = vec!["10".to_string()] ;
-    let y3 = vec!["11".to_string()] ;
-    let y4 = vec!["01".to_string(), "10".to_string()] ;
-    let y5 = vec!["01".to_string(), "11".to_string()] ;
-    let y6 = vec!["10".to_string(), "11".to_string()] ;
-    let y7 = vec!["01".to_string(), "10".to_string(), "11".to_string()] ;
-
-    let x1 = utils::to_vector_space(&y1);
-    let x2 = utils::to_vector_space(&y2);
-    let x3 = utils::to_vector_space(&y3);
-    let x4 = utils::to_vector_space(&y4);
-    let x5 = utils::to_vector_space(&y5);
-    let x6 = utils::to_vector_space(&y6);
-    let x7 = utils::to_vector_space(&y7);
-
-    println!("y1  = {:?}-{:?}", y1,x1);
-    println!("y2  = {:?}-{:?}", y2,x2);
-    println!("y3  = {:?}-{:?}", y3,x3);
-    println!("y4  = {:?}-{:?}", y4,x4);
-    println!("y5  = {:?}-{:?}", y5,x5);
-    println!("y6  = {:?}-{:?}", y6,x6);
-    println!("y7  = {:?}-{:?}", y7,x7);
-
+    println!("Es cierto");
 }
 
-fn test_ax_singlenton(){
-    let combinations = generate_val_combinations(9);
-    let mut counter = 0;
-    for x in combinations.iter().combinations(4) {
-        let point1 = x.get(0).unwrap().to_string();
-        let point2 = x.get(1).unwrap().to_string();
-        let point3 = x.get(2).unwrap().to_string();
-        let point4 = x.get(3).unwrap().to_string();
+fn case() {
+    // counterexample: Some([["01"], ["10"], ["10", "11"], ["01", "11"]])
+    // counterexample: Some([["000", "110", "010", "001"], ["011", "100", "101", "111"], ["010", "110", "001", "000"]])
+    // counterexample: Some([["111", "001", "100", "101"], ["101", "111", "001", "010"], ["000", "010", "011", "110"], ["110", "011", "000", "100"]])
 
-        println!("Case {}", counter);
-        counter = counter + 1;
-        println!("y = {:?}", point1);
-        println!("x = {:?}", point2);
-        println!("u = {:?}", point3);
-        println!("v = {:?}", point4);
-        let result = axioms::ax_singlenton(point1, point2, point3, point4, distances::realspace);
-        println!("result = {:?}", result);
-        match result {
-            Some(_) => {
-                println!("counterexample: {:?}", result);
-                return
-            }, 
-            None => continue
-        };
-    }
+    let sets = Some([["01".to_string(), "00".to_string()], ["10".to_string(), "01".to_string()], ["10".to_string(), "11".to_string()]]);
+
+    let x = sets.clone().unwrap()[0].to_vec();
+    let y = sets.clone().unwrap()[1].to_vec();
+    let z = sets.clone().unwrap()[2].to_vec();
+    let w = vec!["110".to_string(),"111".to_string()];
+    println!("x = {:?}", x);
+
+
+    // let mut unionXuZ = x.clone();
+    // unionXuZ.extend(z.clone());
+    // unionXuZ.sort();
+    // unionXuZ.dedup();
+    //
+    // let mut unionXuW = x.clone();
+    // unionXuW.extend(w.clone());
+    // unionXuW.sort();
+    // unionXuW.dedup();
+    //
+    // let mut unionYuZ = y.clone();
+    // unionYuZ.extend(z.clone());
+    // unionYuZ.sort();
+    // unionYuZ.dedup();
+    //
+    // let mut unionYuW = y.clone();
+    // unionYuW.extend(w.clone());
+    // unionYuW.sort();
+    // unionYuW.dedup();
+
+    let dxy  = distances::average_dis(&x, &y);
+    let dyz  = distances::average_dis(&y, &z);
+    let dxz  = distances::average_dis(&x, &z);
+    let dxw  = distances::average_dis(&x, &w);
+    //
+    // let dunionY_XuZ = distances::fujita(&x, &unionXuZ);
+    // let dunionY_XuW = distances::fujita(&y, &unionXuW);
+    // let dunionX_YuZ = distances::fujita(&x, &unionYuZ);
+    // let dunionX_YuW = distances::fujita(&x, &unionYuW);
+    // let dunions = distances::fujita(&unionXuZ, &unionYuW);
+    //
+    // let dmaxXY = distances::dmax_rel(&x, &y);
+    // let dminXW = distances::dmin_rel(&x, &w);
+    // let dminYZ = distances::dmin_rel(&y, &z);
+    //
+    //
+    // println!("x = {:?}", x);
+    // println!("y = {:?}", y);
+    // println!("z = {:?}", z);
+    // // println!("dxz = {:?}", dxz);
+    // // println!("unionXuZ = {:?}", unionXuZ);
+    // println!("dxy = {:?}", dxy);
+    // println!("dxw = {:?}", dxw);
+    // println!("dyz = {:?}", dyz);
+    // println!("dunions = {:?}", dunions);
+    // // println!("dunionY_XuZ = {:?}", dunionY_XuZ);
+    // // println!("dxw = {:?}", dxw);
+    // // println!("dunionYuW = {:?}", dunionYuW);
+    // // println!("dunionYuZ = {:?}", dunionYuZ);
+    // println!("dmaxXY = {:?}", dmaxXY);
+    // println!("dminYZ = {:?}", dminYZ);
+    // println!("dminXW = {:?}", dminXW);
 
 }
-
 
 fn main() {
     // test_ax_singlenton();
     // debug_vectors();
-    // test(3);
-
-    let x  = vec!["100".to_string(), "011".to_string()];
-    let y  = vec!["010".to_string(), "101".to_string(), "000".to_string()];
-    let z1 = vec!["111".to_string()];
-    let z2 = vec!["11".to_string()];
-
-
-    let mut unionyz1 = y.clone();
-    unionyz1.extend(z1.clone());
-
-    unionyz1.sort();
-    unionyz1.dedup();
-   
-    let dxy  = distances::full_pivot_distance(&x, &y);
-    let dxz  = distances::full_pivot_distance(&x, &z1);
-    let dyunionz  = distances::full_pivot_distance(&unionyz1, &x);
-    let dmaxXZ = distances::dmax_rel(&x, &z1);
-    let dminXY = distances::dmin_rel(&x, &y);
-    println!("x = {:?}", x);
-    println!("y = {:?}", y);
-    println!("z1 = {:?}", z1);
-    println!("yuz = {:?}", unionyz1);
-    println!("dxy = {:?}", dxy);
-    println!("dxz = {:?}", dxz);
-    println!("dyunionz = {:?}", dyunionz);
-    println!("dmaxXz = {:?}", dmaxXZ);
-    println!("dminXY = {:?}", dminXY);
-
-    // let dz1z2 = distances::idis(&z1, &z2);
-    // let dmaxXY = distances::dmax_rel(&x, &y);
-    // let dminZ1Z2 = distances::dmin_rel(&z1, &z2);
-    // println!("dmaxXY = {:?}", dmaxXY);
-    // println!("dminZ1Z2 = {:?}", dminZ1Z2);
-    // println!("dxy = {:?}", dxy);
-    // println!("dz1z2 = {:?}", dz1z2);
-
-    // let dxz1 = distances::idis(&x, &z1);
-    // let dxz2 = distances::idis(&x, &z2);
-    // let dyz1 = distances::idis(&y, &z1);
-    // // let dyz2 = distances::idis(&y, &z2);
-    // let union  = distances::idis(&unionyz2, &unionxz1);
-    //
-    // println!("D(X,Y)={:?} < D(X,Z'')={:?} -----> {:?}", dxy,dxz2, dxy<dxz2);
-    // println!("D(X,Y)={:?} < D(Y,Z')={:?} -----> {:?}", dxy,dyz1, dxy<dxz1);
-    // println!("D(X,Y)={:?} < D(XUZ',YUZ'')={:?} -----> {:?}", dxy,union, dxy<union);
-    // println!("D(X,Z')   = {:?}", dxz2);
-    // println!("D(X,YUZ)  = {:?}", dxyz1);
-    // // println!("D(X,YUZ') = {:?}", dxyz2);
-    // println!("Dmax(X,Y) = {:?}", distances::dmax_rel(&x, &y));
-    // println!("Dmax(X,Z') = {:?}", distances::dmax_rel(&x, &z2));
-    // println!("Dmax(Y,Z'') = {:?}", distances::dmax_rel(&y, &z2));
-    
-
+    test(2);
+    // case();
 }

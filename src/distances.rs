@@ -1,4 +1,4 @@
-use std::{thread, time};
+use std::{thread, time, cmp};
 use std::collections::{HashMap, BTreeMap, HashSet};
 
 use distance::hamming;
@@ -48,6 +48,17 @@ pub fn dmin_rel(set1:&Vec<String>,set2:&Vec<String>) ->f64{
     });
 
     return min as f64;
+}
+
+// The closest point of B to the given a\in A
+pub fn inf_point_to_set(point:&str,set2:&Vec<String>) ->i32{
+    let mut min = 1000000000;
+    set2.iter().for_each(|y_val|{
+        if hamming(point, y_val).unwrap() <= min{
+            min = hamming(point, y_val).unwrap();
+        }
+    });
+    return min as i32;
 }
 
 pub fn andreas_distance(set1:&Vec<String>,set2:&Vec<String>) -> i32{
@@ -247,7 +258,6 @@ pub fn g_average(set1:&Vec<String>, set2:&Vec<String>) -> f64  {
         set2.iter().for_each(|y| {
             let h = hamming(x, y).unwrap();
             dis = dis + h as f64;
-            println!("Distance {} - {}={}", x,y,h);
         })
     });
 
@@ -398,7 +408,7 @@ pub fn full_pivot_distance(set1:&Vec<String>,set2:&Vec<String>) -> f64{
     return distance as f64;
 }
 
-pub fn average(set1:&Vec<String>,set2:&Vec<String>) -> f64{
+pub fn mean_dis(set1:&Vec<String>,set2:&Vec<String>) -> f64{
     let mut distance = 0;
     let card1 = set1.len();
     let card2 = set2.len();
@@ -436,7 +446,7 @@ pub fn fujita(set1:&Vec<String>,set2:&Vec<String>) -> f64 {
     a.iter().for_each(|x| {
         if b_diff.len() as f64 != 0.0 {
             b_diff.iter().for_each(|y|{
-                //println!("{:?}-{:?}={:?}", x,y,hamming(x,y)); //debug
+                // println!("{:?}-{:?}={:?}", x,y,hamming(x,y).unwrap()); //debug
                 d1 = d1 + (hamming(x, y).unwrap() as f64);
             })
         }
@@ -459,4 +469,28 @@ pub fn fujita(set1:&Vec<String>,set2:&Vec<String>) -> f64 {
     //println!("d2 = {:?}", d2); //debug
     
     return d1+d2 as f64;
+}
+
+pub fn hausdorff(set1:&Vec<String>, set2:&Vec<String>)-> i32{
+    let mut sup_set1 = 0;
+    set1.iter().for_each(|x|{
+        let inf = inf_point_to_set(x,set2);
+        if inf > sup_set1{
+            sup_set1 = inf;
+        }
+    });
+
+    let mut sup_set2 = 0;
+    set2.iter().for_each(|y|{
+        let inf = inf_point_to_set(y,set1);
+        if inf > sup_set2{
+            sup_set2 = inf;
+        }
+    });
+
+    if sup_set2 > sup_set1{
+        return sup_set2;
+    }else{
+        return sup_set1;
+    }
 }

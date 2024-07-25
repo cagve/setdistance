@@ -3,7 +3,7 @@ use std::vec;
 use distance::hamming;
 use egui::util;
 
-use crate::{utils::{is_far, get_opt_fun, get_remain_set, are_disjoint, self}, distances::{idis, dmax_rel, average_dis, dmin_rel, self, realspace, pivot_distance}};
+use crate::{distances::{self, average_dis, dmax_rel, dmin_rel, idis, inf_point_to_set, pivot_distance, realspace}, utils::{self, are_disjoint, difference, get_opt_fun, get_remain_set, is_far}};
 
 
 pub fn id (set1: &Vec<String>, dis: fn(&Vec<String>,&Vec<String>) -> i32) -> Option<Vec<Vec<String>>> {
@@ -22,6 +22,54 @@ pub fn sym (set1: &Vec<String>, set2: &Vec<String>, dis: fn(&Vec<String>,&Vec<St
     }else{
         return None;
     }
+}
+
+pub fn p1(set1: &Vec<String>, set2: &Vec<String>,dis: fn(&Vec<String>,&Vec<String>) -> f64) -> bool{
+    println!("=====================NEW CASE: ");
+    println!("set1 = {:?}", set1);
+    println!("set2 = {:?}", set2);
+    let d1 = dis(set1,set2);
+    let diff = difference(set1, set2);
+    for x in diff{
+        println!("======== point {}", &x);
+        let mut uniony = set2.clone();
+        uniony.push(x.to_string());
+        let d2 = dis(set1, &uniony);
+        let min = inf_point_to_set(&x, set2);
+        if d1 < d2 + (min as f64){
+            // println!("Set1 {:?}", set1);
+            // println!("Set2 {:?}", set2);
+            println!("Counter");
+            println!("point {}", x);
+            println!("&d1 = {}", &d1);
+            println!("D(X,YUx) = {}", &d2);
+            println!("D(x,Y) = {}", &min);
+            println!("{}>={}", &d1, &d2+(min as f64));
+            return false;
+        }
+    };
+
+    return true;
+}
+
+pub fn p2(set1: &Vec<String>, universe:Vec<String>, dis: fn(&Vec<String>, &Vec<String>)->f64) -> bool{
+    println!("=====================NEW CASE: ");
+    println!("set1 = {:?}", set1);
+
+    for x in universe{
+        let mut union = set1.clone();
+        union.push(x.clone());
+        let d2 = dis(set1, &union);
+        let min = inf_point_to_set(&x, set1);
+        if d2 != (min as f64){
+            println!("Counter");
+            println!("point {}", &x);
+            println!("D(X,XUx) = {}", &d2);
+            println!("D(x,Y) = {}", &min);
+            return false;
+        }
+    }
+    return true
 }
 
 // pub fn triangle_inequality(set1: &Vec<String>, set2: &Vec<String>, set3:&Vec<String>, dis: fn(&Vec<String>,&Vec<String>) -> i32) -> Option<Vec<Vec<String>>> { FOR NORMAL CASES
@@ -127,12 +175,13 @@ pub fn ax7_1(set1: &Vec<String>,set2: &Vec<String>,set3:&Vec<String>,dis: fn(&Ve
     let dxy = dis(&set1, &set2);
 
     // if set1.len() <= set2.len() && are_disjoint(&set2,&set3) && dis(&set1,&set3)>0{
-    println!("{:?}", set1);
-    println!("{:?}", set2);
-    println!("{:?}", set3);
+    // println!("{:?}", set1);
+    // println!("{:?}", set2);
+    // println!("{:?}", set3);
     // AXIOM 7' disjoint ocndition VVV
     // if  set1.len() <= set2.len() && are_disjoint(set1,set2) && are_disjoint(set1, set3) && are_disjoint(&set2,&set3) && dxz<dxy{
-    if  set1.len() <= set2.len() && are_disjoint(set1,set2) && are_disjoint(set1, set3) && are_disjoint(&set2,&set3) && dmax_rel(set1, set3) < dmin_rel(set1, set2){
+    // if  set1.len() <= set2.len() && are_disjoint(set1,set2) && are_disjoint(set1, set3) && are_disjoint(&set2,&set3) && dmax_rel(set1, set3) < dmin_rel(set1, set2){
+    if  set1.len() <= set2.len() && are_disjoint(set2,set3) && dxz< dxy{
         if dis(&set1,&union_yz) >= dis(&set1,&set2) {
             println!("Counterexaple:");
             return Some(vec![set1.to_vec(),set2.to_vec(),set3.to_vec()]);
@@ -140,6 +189,14 @@ pub fn ax7_1(set1: &Vec<String>,set2: &Vec<String>,set3:&Vec<String>,dis: fn(&Ve
             println!("Applied but no counterexaple:");
             return None;
         }
+    } else if set1.len() > set2.len(){
+        println!("Condition len not working ");
+        
+    } else if !are_disjoint(set2, set3){
+        println!("Condition disjoint not working ");
+
+    } else if dxz > dxy{
+        println!("Condition DXY not working");
     }
     return None;
 }
@@ -149,9 +206,12 @@ pub fn ax8(set1: &Vec<String>,set2: &Vec<String>,set3:&Vec<String>,dis: fn(&Vec<
     union_xz.extend(set3.clone());
 
     let dxy = dis(&set1,&set2);
+    let dyz = dis(&set2,&set3);
     let dxuzy = dis(&union_xz,&set2);
-    if union_xz.len() <= set2.len() && are_disjoint(&set1,&set3) {
-        if dxy <= dxuzy {
+    //Pairwise disjoint
+    // if union_xz.len() <= set2.len() && are_disjoint(&set1,&set3) && are_disjoint(&set1, &set2) && are_disjoint(&set2, &set3) {
+    if union_xz.len() <= set2.len() && are_disjoint(&set1,&set3) && dyz < dxy{
+        if dxy < dxuzy {
             println!("Counterexaple:");
             println!("dis(X,Y) = {:?}", dxy);
             println!("dis(XUZ,Y) = {:?}", dxuzy);
@@ -175,12 +235,15 @@ pub fn ax8_1(set1: &Vec<String>,set2: &Vec<String>,set3:&Vec<String>, set4:&Vec<
     let dyz1 = dis(&set2,&set3);
     let dxuzyuz2 = dis(&union_xz,&union_yz2);
 
-    if set1.len() == set2.len() && are_disjoint(&set2,&set3) && are_disjoint(&set1, &set4) && dxy < dxz2 && dxy < dyz1  {
+    // Axiom 5.1
+    // if set1.len() == set2.len() && are_disjoint(&set1,&set3) && are_disjoint(&set2, &set4) && dxy < dxz2 && dxy < dyz1 {
+    // Axiom 5.1'
+    if set1.len() == set2.len() && are_disjoint(&set1,&set3) && are_disjoint(&set2, &set4) && dmax_rel(set1, set2) < dmin_rel(set1, set4) && dmax_rel(set1, set2) < dmin_rel(set2, set3) {
         if dxy >= dxuzyuz2 {
             println!("Counterexaple:");
             println!("dis(X,Y) = {:?}", dxy);
             println!("dis(XUZ,Y) = {:?}", dxuzyuz2);
-            return Some(vec![set1.to_vec(),set2.to_vec(),set3.to_vec()]);
+            return Some(vec![set1.to_vec(),set2.to_vec(),set3.to_vec(), set4.to_vec()]);
         }else {
             println!("Applied but no counterexaple:");
             return None;
@@ -215,19 +278,21 @@ pub fn ax81_1(set1: &Vec<String>,set2: &Vec<String>,set3:&Vec<String>,set4:&Vec<
 
 pub fn ax5(set1: &Vec<String>,set2: &Vec<String>,set3:&Vec<String>,set4:&Vec<String>,dis: fn(&Vec<String>,&Vec<String>) -> f64) -> Option<Vec<Vec<String>>> {
     let dmax_x1y1 = dmax_rel(set1, set2);
-    let dmax_x2z2 = dmax_rel(set3, set4);
+    let dmax_x2z2 = dmin_rel(set3, set4);
     let dx1y1 = dis(set1,set2);
     let dx2y2 = dis(set3, set4);
 
     if dmax_x1y1 < dmax_x2z2 {
-        if dx2y2 > dx1y1 { //counterexample
+        if dx2y2 >= dx1y1 { //counterexample
             println!("Counterexaple:");
             println!("{:?}", vec![set1.to_vec(),set2.to_vec(),set3.to_vec(),set4.to_vec()]);
             return Some(vec![set1.to_vec(),set2.to_vec(),set3.to_vec(),set4.to_vec()]);
         }else {
+            println!("Applied but not a counterexample");
             return None;
         }
     }else {
+        println!("Not applied");
         return None;
     }
 }
@@ -246,12 +311,12 @@ pub fn ax6(set1: &Vec<String>,set2: &Vec<String>,set3:&Vec<String>,set4:&Vec<Str
     set24.dedup();
 
     let mut counter = 0;
-    //NON DISJOINT OPTION
-    // if set3.len() == set4.len() && dis(set1, set3) < dis(set1,set4) && !utils::are_equals(set1, set3) && !utils::are_equals(set1,set4) {
+    //DISJOINT OPTION between Y and X
+    if set3.len() == set4.len() && dis(set1, set3) < dis(set1,set4) && utils::are_disjoint(set2, set4) && utils::are_disjoint(set2,set3) {
     //DISJOINT OPTION
     // if set3.len() == set4.len() && dis(set1, set3) < dis(set1,set4) && are_disjoint(set1, set3) && are_disjoint(set1, set4) && are_disjoint(set2, set3) && are_disjoint(set2, set4) {
     // DISJOINT OPTION + 6': D(X,Z) < D(X,Y)
-    if set3.len() == set4.len() && dis(set1, set3) < dis(set1,set4) && dis(set1,set3) < dis(set1,set2) && are_disjoint(set1, set3) && are_disjoint(set1, set4) && are_disjoint(set2, set3) && are_disjoint(set2, set4) {
+    // if set3.len() == set4.len() && dis(set1, set3) < dis(set1,set4) && dis(set1,set3) < dis(set1,set2) && are_disjoint(set1, set3) && are_disjoint(set1, set4) && are_disjoint(set2, set3) && are_disjoint(set2, set4) {
     println!("=======CASO NUEVO ==========");
     println!("Set1:, {:?}", set1);
     println!("Set2:, {:?}", set2);
@@ -358,4 +423,6 @@ pub fn ax4(point1: &String,point2: &String, point3: &String, point4:&String, dis
     // }
     return None;
 }
+
+
 
